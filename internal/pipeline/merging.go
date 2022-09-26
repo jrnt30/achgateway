@@ -289,6 +289,7 @@ func (m *filesystemMerging) WithEachMerged(f func(int, upload.Agent, *ach.File) 
 		// Write our file to the mergable directory
 		if err := m.saveMergedFile(dir, files[i]); err != nil {
 			el.Add(fmt.Errorf("problem writing merged file: %v", err))
+			continue // skip upload if we can't cache what to upload
 		}
 
 		// Perform the file upload if we are the shard leader
@@ -302,6 +303,7 @@ func (m *filesystemMerging) WithEachMerged(f func(int, upload.Agent, *ach.File) 
 		} else {
 			logger.Info().Log("we are the leader")
 
+			// Upload the file
 			if err := f(i, agent, files[i]); err != nil {
 				el.Add(fmt.Errorf("problem from callback: %v", err))
 			} else {
